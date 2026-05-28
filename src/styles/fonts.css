@@ -1,0 +1,27 @@
+@font-face {
+    font-family: 'JetBrains Mono';
+    src: url('/webfonts/JetBrainsMono-Light.woff2') format('woff2');
+    font-weight: 300;
+}
+@font-face {
+    font-family: 'JetBrains Mono';
+    src: url('/webfonts/JetBrainsMono-Regular.woff2') format('woff2');
+    font-weight: 400;
+}
+@font-face {
+    font-family: 'JetBrains Mono';
+    src: url('/webfonts/JetBrainsMono-Italic.woff2') format('woff2');
+    font-weight: 400;
+    font-style: italic;
+}
+@font-face {
+    font-family: 'JetBrains Mono';
+    src: url('/webfonts/JetBrainsMono-Bold.woff2') format('woff2');
+    font-weight: 700;
+}
+@font-face {
+    font-family: 'JetBrains Mono';
+    src: url('/webfonts/JetBrainsMono-BoldItalic.woff2') format('woff2');
+    font-weight: 700;
+    font-style: italic;
+}

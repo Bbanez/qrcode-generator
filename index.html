@@ -4,10 +4,89 @@
         <meta charset="UTF-8" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link
+            rel="preload"
+            href="/webfonts/JetBrainsMono-Light.woff2"
+            as="font"
+            type="font/woff2"
+            crossorigin
+        />
+        <link
+            rel="preload"
+            href="/webfonts/JetBrainsMono-Regular.woff2"
+            as="font"
+            type="font/woff2"
+            crossorigin
+        />
+        <link
+            rel="preload"
+            href="/webfonts/JetBrainsMono-Italic.woff2"
+            as="font"
+            type="font/woff2"
+            crossorigin
+        />
+        <link
+            rel="preload"
+            href="/webfonts/JetBrainsMono-Bold.woff2"
+            as="font"
+            type="font/woff2"
+            crossorigin
+        />
+        <link rel="stylesheet" href="/src/styles/reset.css" type="text/css" />
+        <link rel="stylesheet" href="/src/styles/fonts.css" type="text/css" />
+
         <title>QRCode Generator</title>
     </head>
-    <body>
-        <div id="app"></div>
+
+    <body
+        style="
+            background-color: white;
+            color: black;
+            display: flex;
+            flex-direction: column;
+            font-family: 'JetBrains Mono';
+        "
+    >
+        <h1
+            style="
+                font-weight: bold;
+                font-size: 32px;
+                margin: 20px auto 60px auto;
+            "
+        >
+            QRCode Generator
+        </h1>
+        <canvas
+            id="canvas"
+            style="width: 400px; height: 400px; margin: 0 auto"
+            width="400"
+            height="400"
+        ></canvas>
+        <div
+            style="
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+                max-width: 400px;
+                margin: 0 auto;
+            "
+        >
+            <label
+                for="version"
+                style="margin-top: 20px; font-size: 14px; font-weight: lighter"
+            >
+                Select QR Code Version:
+            </label>
+            <select id="version" style="font-size: 16px">
+                <option value="1" selected>Version 1</option>
+                <option value="2">Version 2</option>
+                <option value="3">Version 3</option>
+                <option value="4">Version 4</option>
+                <option value="10">Version 10</option>
+                <option value="25">Version 25</option>
+                <option value="40">Version 40</option>
+            </select>
+        </div>
         <script type="module" src="/src/main.ts"></script>
     </body>
 </html>

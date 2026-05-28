@@ -10,22 +10,28 @@ export async function build() {
         '<script type="module" crossorigin src="/assets/index-',
         '.js"></script>',
     );
-    const js = await fs.readString([`assets`, `index-${scriptHash}.js`]);
+    if (scriptHash) {
+        const js = await fs.readString([`assets`, `index-${scriptHash}.js`]);
+        indexHtml = indexHtml
+            .replace(
+                `<script type="module" crossorigin src="/assets/index-${scriptHash}.js"></script>`,
+                ``,
+            )
+            .replace('</body>', `  <script>${js}</script>\n</body>`);
+        await fs.deleteFile([`assets`, `index-${scriptHash}.js`]);
+    }
     const cssHash = StringUtility.textBetween(
         indexHtml,
         '<link rel="stylesheet" crossorigin href="/assets/index-',
         '.css">',
     );
-    const css = await fs.readString([`assets`, `index-${cssHash}.css`]);
-    indexHtml = indexHtml
-        .replace(
-            `<script type="module" crossorigin src="/assets/index-${scriptHash}.js"></script>`,
-            ``,
-        )
-        .replace('</body>', `  <script>${js}</script>\n</body>`)
-        .replace(
+    if (cssHash) {
+        const css = await fs.readString([`assets`, `index-${cssHash}.css`]);
+        indexHtml = indexHtml.replace(
             `<link rel="stylesheet" crossorigin href="/assets/index-${cssHash}.css">`,
             `<style>${css}</style>`,
         );
+        await fs.deleteFile([`assets`, `index-${cssHash}.css`]);
+    }
     await fs.save('index.html', indexHtml);
 }
