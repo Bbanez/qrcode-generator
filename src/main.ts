@@ -12,11 +12,15 @@ function drawQrCode(
 ): void {
     container.removeChildren();
     const canvasSize = vec2(canvas.clientWidth, canvas.clientHeight);
-    const gt = new GridTransform(code.info.size, canvasSize);
+    const quietZone = 4;
+    const gt = new GridTransform(
+        code.info.size.add(vec2(quietZone * 2)),
+        canvasSize,
+    );
     // const compCode = code.mulEl(mask);
     for (let y = 0; y < code.bits.data.length; y++) {
         for (let x = 0; x < code.bits.data[y].length; x++) {
-            const [tl, br] = gt.out(vec2(x, y));
+            const [tl, br] = gt.out(vec2(x + quietZone, y + quietZone));
             const g = new Graphics();
             g.rect(tl.x, tl.y, br.x - tl.x, br.y - tl.y);
             // g.fill(compCode.data[y][x] ? 0x000000 : 0xffffff);
@@ -62,22 +66,22 @@ function drawQrCode(
             container.addChild(g);
         }
     }
-    for (let y = 0; y < code.maskData.data.length; y++) {
-        for (let x = 0; x < code.maskData.data[y].length; x++) {
-            const [tl, br] = gt.out(vec2(x, y));
-            // g.fill(compCode.data[y][x] ? 0x000000 : 0xffffff);
-            const val = code.maskData.data[y][x];
-            if (!val) {
-                continue;
-            }
-            const g = new Graphics({
-                alpha: 0.2,
-            });
-            g.rect(tl.x, tl.y, br.x - tl.x, br.y - tl.y);
-            g.fill(0xff0000);
-            container.addChild(g);
-        }
-    }
+    // for (let y = 0; y < code.maskData.data.length; y++) {
+    //     for (let x = 0; x < code.maskData.data[y].length; x++) {
+    //         const [tl, br] = gt.out(vec2(x + quietZone, y + quietZone));
+    //         // g.fill(compCode.data[y][x] ? 0x000000 : 0xffffff);
+    //         const val = code.maskData.data[y][x];
+    //         if (!val) {
+    //             continue;
+    //         }
+    //         const g = new Graphics({
+    //             alpha: 0.2,
+    //         });
+    //         g.rect(tl.x, tl.y, br.x - tl.x, br.y - tl.y);
+    //         g.fill(0xff0000);
+    //         container.addChild(g);
+    //     }
+    // }
 }
 
 async function main(): Promise<void> {
@@ -93,10 +97,13 @@ async function main(): Promise<void> {
     input.addEventListener('input', () => {
         code.setData(input.value);
         drawQrCode(code, canvas, container);
+        infoEl.innerHTML = `Version: ${code.info.version}<br/> EC Level: ${code.info.ecLevel}<br/> Mode: ${code.info.mode}<br/> Data codewords: ${code.info.dataCodewords}`;
     });
+    const infoEl = document.getElementById('info') as HTMLDivElement;
 
     const code = new Qr('M', 0b100, input.value);
     drawQrCode(code, canvas, container);
+    infoEl.innerHTML = `Version: ${code.info.version}<br/> EC Level: ${code.info.ecLevel}<br/> Mode: ${code.info.mode}<br/> Data codewords: ${code.info.dataCodewords}`;
 
     app.ticker.add((_time) => {});
 }

@@ -1,6 +1,6 @@
 import { mat, Mat } from './math/mat';
-import { idxToXy } from './math/transform';
-import { vec2, type Vec2 } from './math/vec2';
+import { vec2 } from './math/vec2';
+import { getQrCodewords } from './qr-error';
 import { getQrInfo, type QrEcLevel, type QrInfo } from './qr-info';
 
 export class Qr {
@@ -38,6 +38,18 @@ export class Qr {
             const shift = bitLen(value) - bitLen(generator);
             value ^= generator << shift;
         }
+        return value;
+    }
+
+    getVersionBCH(): number {
+        const generator = 0b1111100100101;
+        let value = this.info.version << 12;
+
+        while (value.toString(2).length >= generator.toString(2).length) {
+            const shift = value.toString(2).length - generator.toString(2).length;
+            value ^= generator << shift;
+        }
+
         return value;
     }
 
@@ -84,101 +96,93 @@ export class Qr {
             const pos = this.info.aMarkers[i];
             dataMask = dataMask.setElOffs(aMarker, pos);
         }
+        if (this.info.version >= 7) {
+            dataMask = dataMask
+                .setElOffs(mat(vec2(3, 6), 1), vec2(this.info.size.x - 11, 0))
+                .setElOffs(mat(vec2(6, 3), 1), vec2(0, this.info.size.y - 11));
+        }
         return dataMask;
     }
 
-    private fixTopOut(pos: Vec2, dir: Vec2): boolean {
-        if (pos.y < 0) {
-            pos.y = 0;
-            pos.x -= 2;
-            dir.y *= -1;
-            return true;
+    private getMaskBit(x: number, y: number): boolean {
+        switch (this.mask) {
+            case 0:
+                return (x + y) % 2 === 0;
+            case 1:
+                return y % 2 === 0;
+            case 2:
+                return x % 3 === 0;
+            case 3:
+                return (x + y) % 3 === 0;
+            case 4:
+                return (Math.floor(y / 2) + Math.floor(x / 3)) % 2 === 0;
+            case 5:
+                return ((x * y) % 2) + ((x * y) % 3) === 0;
+            case 6:
+                return (((x * y) % 2) + ((x * y) % 3)) % 2 === 0;
+            case 7:
+                return (((x + y) % 2) + ((x * y) % 3)) % 2 === 0;
+            default:
+                throw new Error(`Invalid QR mask pattern: ${this.mask}`);
         }
-        return false;
     }
 
-    private fixBottomOut(pos: Vec2, dir: Vec2): boolean {
-        if (pos.y >= this.info.size.y) {
-            pos.y = this.info.size.y - 1;
-            pos.x -= 2;
-            dir.y *= -1;
-            return true;
-        }
-        return false;
-    }
-
-    private nextBitPos(pos: Vec2, dir: Vec2, dataMask: Mat): Vec2 {
-        let newPos = vec2(pos.x, pos.y);
-        if (this.fixTopOut(newPos, dir)) {
-            return newPos;
-        }
-        if (this.fixBottomOut(newPos, dir)) {
-            return newPos;
-        }
-        newPos.x += 1 * dir.x;
-        if (newPos.x % 2 === 0) {
-            newPos.x += 2;
-            newPos.y += dir.y;
-            if (this.fixTopOut(newPos, dir)) {
-                return newPos;
-            }
-            if (this.fixBottomOut(newPos, dir)) {
-                return newPos;
+    private applyMask(dataMask: Mat): void {
+        for (let y = 0; y < this.info.size.y; y++) {
+            for (let x = 0; x < this.info.size.x; x++) {
+                if (dataMask.data[y][x] || !this.getMaskBit(x, y)) {
+                    continue;
+                }
+                this.bits.data[y][x] ^= 1;
             }
         }
-        return newPos;
     }
 
     private fillData(dataBytes: number[], dataMask: Mat): void {
-        this.bits.data[this.info.size.y - 1][this.info.size.x - 1] = 0;
-        this.bits.data[this.info.size.y - 1][this.info.size.x - 2] = 1;
-        this.bits.data[this.info.size.y - 2][this.info.size.x - 1] = 0;
-        this.bits.data[this.info.size.y - 2][this.info.size.x - 2] = 0;
-        const dir = vec2(-1, -1);
-        const pos = vec2(this.info.size.x - 1, this.info.size.y - 3);
-        for (let i = 0; i < dataBytes.length; i++) {
-            const bits = dataBytes[i].toString(2).padStart(8, '0');
-            // let color = (i % 3) + 2;
-            const bitsLen = dataBytes[i] === 0 ? 4 : 8;
-            let idx = 0;
-            let loop = -1;
-            while (idx < bitsLen) {
-                loop++;
-                if (
-                    pos.x < 0 ||
-                    pos.x >= this.info.size.x ||
-                    pos.y < 0 ||
-                    pos.y >= this.info.size.y
-                ) {
-                    console.log(
-                        'Data position out of bounds or masked:',
-                        pos,
-                        i,
-                        idx,
-                    );
-                    return;
-                }
-                this.bits.data[pos.y][pos.x] =
-                    bits[bits.length - 1 - idx] === '1' ? 1 : 0;
-                // this.bits.data[pos.y][pos.x] = color;
-                let newPos = this.nextBitPos(pos, dir, dataMask);
-                while (dataMask.data[newPos.y][newPos.x]) {
-                    newPos = this.nextBitPos(newPos, dir, dataMask);
-                }
-                pos.x = newPos.x;
-                pos.y = newPos.y;
-                idx++;
+        const totalDataBits = dataBytes.length * 8;
+        let bitIndex = 0;
+        for (let right = this.info.size.x - 1; right >= 1; right -= 2) {
+            if (right === 6) {
+                right--;
             }
-            // pos.x += 2;
-            // pos.y += dir.y;
+
+            const upward = Math.floor((this.info.size.x - right) / 2) % 2 === 0;
+            for (let offset = 0; offset < this.info.size.y; offset++) {
+                const y = upward ? this.info.size.y - 1 - offset : offset;
+                for (let dx = 0; dx < 2; dx++) {
+                    const x = right - dx;
+                    if (dataMask.data[y][x]) {
+                        continue;
+                    }
+                    let bit = 0;
+                    if (bitIndex < totalDataBits) {
+                        const byteIndex = Math.floor(bitIndex / 8);
+                        const bitInByte = 7 - (bitIndex % 8);
+                        bit = (dataBytes[byteIndex] >>> bitInByte) & 1;
+                        bitIndex++;
+                    }
+                    this.bits.data[y][x] = bit;
+                }
+            }
+        }
+
+        if (bitIndex !== totalDataBits) {
+            throw new Error(
+                `QR data placement mismatch: placed ${bitIndex} bits, expected ${totalDataBits}`,
+            );
         }
     }
 
     private generate(): void {
         console.log(this.info);
         const formatData =
-            (((this.info.ecLevel << 3) | this.mask) << 10) |
-            this.getFormatBCH();
+            ((((this.info.ecLevel << 3) | this.mask) << 10) |
+                this.getFormatBCH()) ^
+            0b101010000010010;
+        const versionData =
+            this.info.version >= 7
+                ? (this.info.version << 12) | this.getVersionBCH()
+                : 0;
         const formatDataStr = formatData
             .toString(2)
             .padStart(15, '0')
@@ -260,38 +264,45 @@ export class Qr {
                         .map((e) => (e === '1' ? [1] : [0])),
                 ),
                 vec2(markerSize.x, this.info.size.y - 5),
-            )
-            .mulElOffs(
-                mat([
-                    ...errorFormatParts.slice(0, 6).map((e) => [e]),
-                    [1],
-                    ...errorFormatParts.slice(6, 8).map((e) => [e]),
-                ]),
-                vec2(markerSize.x, 0),
-            )
-            .mulElOffs(
-                mat([
-                    errorFormatParts
-                        .slice(0, 8)
-                        .reverse()
-                        .map((e) => e),
-                ]),
-                vec2(this.info.size.x - markerSize.x, markerSize.y),
             );
-        this.bits.data[markerSize.y][markerSize.x - 1] = errorFormatParts[8];
-        this.bits.data[markerSize.y][markerSize.x - 3] = errorFormatParts[9];
-        this.bits.data[this.info.size.y - markerSize.y + 1][markerSize.x] =
-            errorFormatParts[8];
+        this.bits.data[markerSize.y][markerSize.x - 3] = errorFormatParts[0];
+        this.bits.data[markerSize.y][markerSize.x - 1] = errorFormatParts[1];
+        this.bits = this.bits.mulElOffs(
+            mat([
+                ...errorFormatParts
+                    .slice(4, 10)
+                    .reverse()
+                    .map((e) => [e]),
+                [1],
+                ...errorFormatParts
+                    .slice(2, 4)
+                    .reverse()
+                    .map((e) => [e]),
+            ]),
+            vec2(markerSize.x, 0),
+        );
         this.bits.data[this.info.size.y - markerSize.y + 2][markerSize.x] =
-            errorFormatParts[9];
+            errorFormatParts[0];
+        this.bits.data[this.info.size.y - markerSize.y + 1][markerSize.x] =
+            errorFormatParts[1];
+        this.bits = this.bits.mulElOffs(
+            mat([errorFormatParts.slice(2, 10).map((e) => e)]),
+            vec2(this.info.size.x - markerSize.x, markerSize.y),
+        );
+        if (this.info.version >= 7) {
+            for (let i = 0; i < 18; i++) {
+                const bit = (versionData >>> i) & 1;
+                this.bits.data[Math.floor(i / 3)][this.info.size.x - 11 + (i % 3)] =
+                    bit;
+                this.bits.data[this.info.size.y - 11 + (i % 3)][Math.floor(i / 3)] =
+                    bit;
+            }
+        }
 
         const dataMask = this.getDataMask();
-        const dataBytes = [
-            this.data.length,
-            ...new TextEncoder().encode(this.data),
-            0,
-        ];
+        const dataBytes = getQrCodewords(this.dataBytes, this.info);
         this.fillData(dataBytes, dataMask);
+        this.applyMask(dataMask);
         this.maskData = dataMask;
         // this.bits = dataMask;
     }
