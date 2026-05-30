@@ -146,7 +146,6 @@ function getAlignmentMarkers(version: number): Vec2[] {
     const positions = getAlignmentPatternPositions(version);
     const lastIndex = positions.length - 1;
     const markers: Vec2[] = [];
-
     for (let yIndex = 0; yIndex < positions.length; yIndex++) {
         for (let xIndex = 0; xIndex < positions.length; xIndex++) {
             if (
@@ -159,7 +158,6 @@ function getAlignmentMarkers(version: number): Vec2[] {
             markers.push(vec2(positions[xIndex] - 2, positions[yIndex] - 2));
         }
     }
-
     return markers;
 }
 

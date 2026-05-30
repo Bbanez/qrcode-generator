@@ -43,22 +43,18 @@ function appendBits(value: number, bitCount: number, bits: number[]): void {
 function getDataCodewords(data: Uint8Array, info: QrInfo): number[] {
     const capacityBits = info.dataCodewords * 8;
     const bits: number[] = [];
-
     appendBits(info.mode, 4, bits);
     appendBits(data.length, getByteCharCountBits(info.version), bits);
     for (let i = 0; i < data.length; i++) {
         appendBits(data[i], 8, bits);
     }
-
     if (bits.length > capacityBits) {
         throw new Error('data does not fit selected QR version');
     }
-
     appendBits(0, Math.min(4, capacityBits - bits.length), bits);
     while (bits.length % 8 !== 0) {
         bits.push(0);
     }
-
     const dataCodewords: number[] = [];
     for (let i = 0; i < bits.length; i += 8) {
         let codeword = 0;
@@ -67,12 +63,10 @@ function getDataCodewords(data: Uint8Array, info: QrInfo): number[] {
         }
         dataCodewords.push(codeword);
     }
-
     const padCodewords = [0xec, 0x11];
     while (dataCodewords.length < info.dataCodewords) {
         dataCodewords.push(padCodewords[dataCodewords.length % 2]);
     }
-
     return dataCodewords;
 }
 
@@ -80,7 +74,6 @@ function makeGenerator(degree: number): Uint8Array {
     const result = new Uint8Array(degree);
     result[degree - 1] = 1;
     let root = 1;
-
     for (let i = 0; i < degree; i++) {
         for (let j = 0; j < result.length; j++) {
             result[j] = gfMultiply(result[j], root);
@@ -90,7 +83,6 @@ function makeGenerator(degree: number): Uint8Array {
         }
         root = gfMultiply(root, 0x02);
     }
-
     return result;
 }
 
@@ -99,7 +91,6 @@ function getErrorCorrectionCodewords(
     generator: Uint8Array,
 ): number[] {
     const result = new Uint8Array(generator.length);
-
     for (let i = 0; i < data.length; i++) {
         const factor = data[i] ^ result[0];
         result.copyWithin(0, 1);
@@ -108,7 +99,6 @@ function getErrorCorrectionCodewords(
             result[j] ^= gfMultiply(generator[j], factor);
         }
     }
-
     return Array.from(result);
 }
 
@@ -122,7 +112,6 @@ export function getQrCodewords(data: Uint8Array, info: QrInfo): number[] {
     const generator = makeGenerator(eccLen);
     const dataBlocks: number[][] = [];
     const ecBlocks: number[][] = [];
-
     let offset = 0;
     for (let blockIndex = 0; blockIndex < numBlocks; blockIndex++) {
         const dataLen =
@@ -132,7 +121,6 @@ export function getQrCodewords(data: Uint8Array, info: QrInfo): number[] {
         dataBlocks.push(block);
         ecBlocks.push(getErrorCorrectionCodewords(block, generator));
     }
-
     const interleaved: number[] = [];
     const maxDataLen = shortBlockDataLen + (numShortBlocks < numBlocks ? 1 : 0);
     for (let i = 0; i < maxDataLen; i++) {
@@ -147,6 +135,5 @@ export function getQrCodewords(data: Uint8Array, info: QrInfo): number[] {
             interleaved.push(ecBlocks[blockIndex][i]);
         }
     }
-
     return interleaved;
 }

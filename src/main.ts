@@ -97,13 +97,13 @@ async function main(): Promise<void> {
     input.addEventListener('input', () => {
         code.setData(input.value);
         drawQrCode(code, canvas, container);
-        infoEl.innerHTML = `Version: ${code.info.version}<br/> EC Level: ${code.info.ecLevel}<br/> Mode: ${code.info.mode}<br/> Data codewords: ${code.info.dataCodewords}`;
+        infoEl.innerHTML = `Version: ${code.info.version}<br/> EC Level: ${code.info.ecLevel}<br/> Mode: ${code.info.mode}<br/> Data codewords: ${code.info.dataCodewords}<br/> Mask: ${code.mask}`;
     });
     const infoEl = document.getElementById('info') as HTMLDivElement;
 
-    const code = new Qr('M', input.value);
+    const code = new Qr('H', input.value);
     drawQrCode(code, canvas, container);
-    infoEl.innerHTML = `Version: ${code.info.version}<br/> EC Level: ${code.info.ecLevel}<br/> Mode: ${code.info.mode}<br/> Data codewords: ${code.info.dataCodewords}`;
+    infoEl.innerHTML = `Version: ${code.info.version}<br/> EC Level: ${code.info.ecLevel}<br/> Mode: ${code.info.mode}<br/> Data codewords: ${code.info.dataCodewords}<br/> Mask: ${code.mask}`;
 
     app.ticker.add((_time) => {});
 }
