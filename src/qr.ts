@@ -27,6 +27,11 @@ export class Qr {
         this.generate();
     }
 
+    setEcLevel(ecLevel: QrEcLevel): void {
+        this.info = getQrInfo(this.dataBytes.length, ecLevel);
+        this.generate();
+    }
+
     private getFormatBCH(mask: number): number {
         const generator = 0b10100110111;
         const data5 = (this.info.ecLevel << 3) | mask;

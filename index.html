@@ -64,8 +64,10 @@
         ></canvas>
         <div
             style="
+                position: relative;
                 display: flex;
                 flex-direction: column;
+                gap: 20px;
                 width: 100%;
                 max-width: 400px;
                 margin: 0 auto;
@@ -75,9 +77,6 @@
                 id="input"
                 placeholder="Enter text to generate QR code"
                 style="
-                    margin: 20px auto;
-                    width: 100%;
-                    max-width: 400px;
                     height: 100px;
                     padding: 10px;
                     font-size: 16px;
@@ -86,7 +85,21 @@
                     resize: none;
                 "
             ></textarea>
-            <div id="info"></div>
+            <select
+                id="ec-level"
+                style="
+                    width: 100%;
+                    padding: 10px;
+                    font-size: 16px;
+                    border: 1px solid #ccc;
+                    border-radius: 4px;
+                "
+            >
+                <option value="L">Low (7%)</option>
+                <option value="M">Medium (15%)</option>
+                <option value="Q">Quartile (25%)</option>
+                <option value="H" selected>High (30%)</option>
+            </select>
         </div>
         <script type="module" src="/src/main.ts"></script>
     </body>

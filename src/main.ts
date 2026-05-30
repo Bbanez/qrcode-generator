@@ -97,13 +97,18 @@ async function main(): Promise<void> {
     input.addEventListener('input', () => {
         code.setData(input.value);
         drawQrCode(code, canvas, container);
-        infoEl.innerHTML = `Version: ${code.info.version}<br/> EC Level: ${code.info.ecLevel}<br/> Mode: ${code.info.mode}<br/> Data codewords: ${code.info.dataCodewords}<br/> Mask: ${code.mask}`;
     });
-    const infoEl = document.getElementById('info') as HTMLDivElement;
+    const ecLevelEl = document.getElementById('ec-level') as HTMLSelectElement;
+    if (!ecLevelEl) {
+        throw new Error('EC level select element not found');
+    }
+    ecLevelEl.addEventListener('change', () => {
+        code.setEcLevel(ecLevelEl.value as any);
+        drawQrCode(code, canvas, container);
+    });
 
     const code = new Qr('H', input.value);
     drawQrCode(code, canvas, container);
-    infoEl.innerHTML = `Version: ${code.info.version}<br/> EC Level: ${code.info.ecLevel}<br/> Mode: ${code.info.mode}<br/> Data codewords: ${code.info.dataCodewords}<br/> Mask: ${code.mask}`;
 
     app.ticker.add((_time) => {});
 }
