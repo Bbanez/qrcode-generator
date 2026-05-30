@@ -82,6 +82,25 @@ export class Mat {
         return outMat;
     }
 
+    setElOffs(mat: Mat, off: Vec2): Mat {
+        const outMat = this.clone();
+        for (let y = 0; y < mat.size().y; y++) {
+            for (let x = 0; x < mat.size().x; x++) {
+                const outX = x + off.x;
+                const outY = y + off.y;
+                if (
+                    outX >= 0 &&
+                    outX < outMat.size().x &&
+                    outY >= 0 &&
+                    outY < outMat.size().y
+                ) {
+                    outMat.data[outY][outX] = mat.data[y][x];
+                }
+            }
+        }
+        return outMat;
+    }
+
     clone(): Mat {
         const d: number[][] = [];
         for (let y = 0; y < this.data.length; y++) {

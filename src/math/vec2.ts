@@ -47,12 +47,15 @@ export class Vec2 {
 export function vec2(): Vec2;
 export function vec2(x: number): Vec2;
 export function vec2(x: number, y: number): Vec2;
-export function vec2(x?: number, y?: number): Vec2 {
-    if (x === undefined) {
+export function vec2(vec: Vec2): Vec2;
+export function vec2(arg1?: number | Vec2, arg2?: number): Vec2 {
+    if (arg1 === undefined) {
         return new Vec2(0, 0);
-    } else if (y === undefined) {
-        return new Vec2(x, x);
-    } else {
+    } else if (typeof arg1 === 'number') {
+        const x = arg1;
+        const y = arg2 === undefined ? arg1 : arg2;
         return new Vec2(x, y);
+    } else {
+        return new Vec2(arg1.x, arg1.y);
     }
 }
