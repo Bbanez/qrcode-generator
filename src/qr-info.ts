@@ -59,6 +59,7 @@ export interface QrInfo {
     dataLenBytes: number;
     version: number;
     size: Vec2;
+    aMarkers: Vec2[];
     ecLevelCode: QrEcLevel;
     ecLevel: number;
     modeCode: QrMode;
@@ -91,6 +92,46 @@ function getNumDataCodewords(version: number, ecLevel: QrEcLevel): number {
 function getCharCountBits(version: number, mode: QrMode): number {
     const rangeIndex = Math.floor((version + 7) / 17);
     return CHAR_COUNT_BITS[mode][rangeIndex];
+}
+
+function getAlignmentPatternPositions(version: number): number[] {
+    if (version === 1) {
+        return [];
+    }
+
+    const numAlign = Math.floor(version / 7) + 2;
+    const step =
+        version === 32
+            ? 26
+            : Math.ceil((version * 4 + numAlign * 2 + 1) / (numAlign * 2 - 2)) * 2;
+    const positions = [6];
+
+    for (let pos = version * 4 + 10; positions.length < numAlign; pos -= step) {
+        positions.splice(1, 0, pos);
+    }
+
+    return positions;
+}
+
+function getAlignmentMarkers(version: number): Vec2[] {
+    const positions = getAlignmentPatternPositions(version);
+    const lastIndex = positions.length - 1;
+    const markers: Vec2[] = [];
+
+    for (let yIndex = 0; yIndex < positions.length; yIndex++) {
+        for (let xIndex = 0; xIndex < positions.length; xIndex++) {
+            if (
+                (xIndex === 0 && yIndex === 0) ||
+                (xIndex === lastIndex && yIndex === 0) ||
+                (xIndex === 0 && yIndex === lastIndex)
+            ) {
+                continue;
+            }
+            markers.push(vec2(positions[xIndex] - 2, positions[yIndex] - 2));
+        }
+    }
+
+    return markers;
 }
 
 function ecLevelValue(ecLevel: QrEcLevel): number {
@@ -135,6 +176,7 @@ export function getQrInfo(dataLenBytes: number, ecLevel: QrEcLevel): QrInfo {
                 dataLenBytes,
                 version,
                 size: vec2(version * 4 + 17),
+                aMarkers: getAlignmentMarkers(version),
                 ecLevelCode: ecLevel,
                 ecLevel: ecLevelValue(ecLevel),
                 modeCode: 'byte',

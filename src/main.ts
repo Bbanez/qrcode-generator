@@ -62,6 +62,22 @@ function drawQrCode(
             container.addChild(g);
         }
     }
+    for (let y = 0; y < code.maskData.data.length; y++) {
+        for (let x = 0; x < code.maskData.data[y].length; x++) {
+            const [tl, br] = gt.out(vec2(x, y));
+            // g.fill(compCode.data[y][x] ? 0x000000 : 0xffffff);
+            const val = code.maskData.data[y][x];
+            if (!val) {
+                continue;
+            }
+            const g = new Graphics({
+                alpha: 0.2,
+            });
+            g.rect(tl.x, tl.y, br.x - tl.x, br.y - tl.y);
+            g.fill(0xff0000);
+            container.addChild(g);
+        }
+    }
 }
 
 async function main(): Promise<void> {
