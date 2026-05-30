@@ -12,7 +12,7 @@ function drawQrCode(
 ): void {
     container.removeChildren();
     const canvasSize = vec2(canvas.clientWidth, canvas.clientHeight);
-    const quietZone = 4;
+    const quietZone = 0;
     const gt = new GridTransform(
         code.info.size.add(vec2(quietZone * 2)),
         canvasSize,
