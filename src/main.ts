@@ -60,7 +60,7 @@ function drawQrCode(
                     g.fill(0xee0000);
                     break;
                 default:
-                    g.fill(code.bits.data[y][x] ? 0x000000 : 0xffffff);
+                    g.fill(!code.bits.data[y][x] ? 0x000000 : 0xffffff);
                     break;
             }
             container.addChild(g);
@@ -87,7 +87,7 @@ function drawQrCode(
 async function main(): Promise<void> {
     const app = new Application();
     const canvas = document.getElementById('canvas') as HTMLCanvasElement;
-    await app.init({ background: '#ffffff', resizeTo: canvas, canvas });
+    await app.init({ resizeTo: canvas, canvas });
     const container = new Container();
     app.stage.addChild(container);
     const input = document.getElementById('input') as HTMLInputElement;
