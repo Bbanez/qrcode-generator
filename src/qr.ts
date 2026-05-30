@@ -11,9 +11,9 @@ export class Qr {
     maskData: Mat;
     info: QrInfo;
 
-    constructor(ecLevel: QrEcLevel, mask: number, data: string) {
+    constructor(ecLevel: QrEcLevel, data: string) {
         this.maskData = null as never;
-        this.mask = mask;
+        this.mask = 0;
         this.data = data;
         this.dataBytes = new TextEncoder().encode(data);
         this.info = getQrInfo(this.dataBytes.length, ecLevel);
@@ -27,21 +27,19 @@ export class Qr {
         this.generate();
     }
 
-    getFormatBCH(): number {
+    private getFormatBCH(mask: number): number {
         const generator = 0b10100110111;
-        const data5 = (this.info.ecLevel << 3) | this.mask;
+        const data5 = (this.info.ecLevel << 3) | mask;
         let value = data5 << 10;
-        function bitLen(n: number): number {
-            return n.toString(2).length;
-        }
-        while (bitLen(value) >= bitLen(generator)) {
-            const shift = bitLen(value) - bitLen(generator);
+
+        while (value.toString(2).length >= generator.toString(2).length) {
+            const shift = value.toString(2).length - generator.toString(2).length;
             value ^= generator << shift;
         }
         return value;
     }
 
-    getVersionBCH(): number {
+    private getVersionBCH(): number {
         const generator = 0b1111100100101;
         let value = this.info.version << 12;
 
@@ -59,6 +57,7 @@ export class Qr {
         const markerMaskSize = markerMask.size();
         const stripLen = this.info.size.x - 2 * markerMaskSize.x;
         const strip: number[] = new Array(stripLen).fill(1);
+
         dataMask = dataMask
             .setElOffs(markerMask, vec2(0, 0))
             .setElOffs(markerMask, vec2(this.info.size.x - markerMaskSize.x, 0))
@@ -91,21 +90,24 @@ export class Qr {
                 mat(new Array(markerMaskSize.y).fill(1).map((e) => [e])),
                 vec2(markerMaskSize.x, this.info.size.y - markerMaskSize.y),
             );
+
         const aMarker = mat(vec2(5), 1);
         for (let i = 0; i < this.info.aMarkers.length; i++) {
             const pos = this.info.aMarkers[i];
             dataMask = dataMask.setElOffs(aMarker, pos);
         }
+
         if (this.info.version >= 7) {
             dataMask = dataMask
                 .setElOffs(mat(vec2(3, 6), 1), vec2(this.info.size.x - 11, 0))
                 .setElOffs(mat(vec2(6, 3), 1), vec2(0, this.info.size.y - 11));
         }
+
         return dataMask;
     }
 
-    private getMaskBit(x: number, y: number): boolean {
-        switch (this.mask) {
+    private getMaskBit(mask: number, x: number, y: number): boolean {
+        switch (mask) {
             case 0:
                 return (x + y) % 2 === 0;
             case 1:
@@ -123,24 +125,25 @@ export class Qr {
             case 7:
                 return (((x + y) % 2) + ((x * y) % 3)) % 2 === 0;
             default:
-                throw new Error(`Invalid QR mask pattern: ${this.mask}`);
+                throw new Error(`Invalid QR mask pattern: ${mask}`);
         }
     }
 
-    private applyMask(dataMask: Mat): void {
+    private applyMask(bits: Mat, dataMask: Mat, mask: number): void {
         for (let y = 0; y < this.info.size.y; y++) {
             for (let x = 0; x < this.info.size.x; x++) {
-                if (dataMask.data[y][x] || !this.getMaskBit(x, y)) {
+                if (dataMask.data[y][x] || !this.getMaskBit(mask, x, y)) {
                     continue;
                 }
-                this.bits.data[y][x] ^= 1;
+                bits.data[y][x] ^= 1;
             }
         }
     }
 
-    private fillData(dataBytes: number[], dataMask: Mat): void {
+    private fillData(bits: Mat, dataBytes: number[], dataMask: Mat): void {
         const totalDataBits = dataBytes.length * 8;
         let bitIndex = 0;
+
         for (let right = this.info.size.x - 1; right >= 1; right -= 2) {
             if (right === 6) {
                 right--;
@@ -161,7 +164,7 @@ export class Qr {
                         bit = (dataBytes[byteIndex] >>> bitInByte) & 1;
                         bitIndex++;
                     }
-                    this.bits.data[y][x] = bit;
+                    bits.data[y][x] = bit;
                 }
             }
         }
@@ -173,11 +176,84 @@ export class Qr {
         }
     }
 
-    private generate(): void {
-        console.log(this.info);
+    private getPenaltyScoreLine(line: number[]): number {
+        let score = 0;
+        let runColor = line[0];
+        let runLength = 1;
+
+        for (let i = 1; i <= line.length; i++) {
+            if (i < line.length && line[i] === runColor) {
+                runLength++;
+                continue;
+            }
+
+            if (runLength >= 5) {
+                score += runLength - 2;
+            }
+
+            if (i < line.length) {
+                runColor = line[i];
+                runLength = 1;
+            }
+        }
+
+        for (let i = 0; i <= line.length - 11; i++) {
+            const pattern = line.slice(i, i + 11).join('');
+            if (pattern === '00001011101' || pattern === '10111010000') {
+                score += 40;
+            }
+        }
+
+        return score;
+    }
+
+    private getPenaltyScore(bits: Mat): number {
+        let score = 0;
+        const size = bits.size();
+        let darkModules = 0;
+
+        for (let y = 0; y < size.y; y++) {
+            score += this.getPenaltyScoreLine(bits.data[y]);
+            for (let x = 0; x < size.x; x++) {
+                if (bits.data[y][x]) {
+                    darkModules++;
+                }
+            }
+        }
+
+        for (let x = 0; x < size.x; x++) {
+            const column: number[] = [];
+            for (let y = 0; y < size.y; y++) {
+                column.push(bits.data[y][x]);
+            }
+            score += this.getPenaltyScoreLine(column);
+        }
+
+        for (let y = 0; y < size.y - 1; y++) {
+            for (let x = 0; x < size.x - 1; x++) {
+                const color = bits.data[y][x];
+                if (
+                    bits.data[y][x + 1] === color &&
+                    bits.data[y + 1][x] === color &&
+                    bits.data[y + 1][x + 1] === color
+                ) {
+                    score += 3;
+                }
+            }
+        }
+
+        const totalModules = size.x * size.y;
+        score +=
+            (Math.ceil(Math.abs(darkModules * 20 - totalModules * 10) / totalModules) -
+                1) *
+            10;
+
+        return score;
+    }
+
+    private buildBits(mask: number, dataBytes: number[], dataMask: Mat): Mat {
         const formatData =
-            ((((this.info.ecLevel << 3) | this.mask) << 10) |
-                this.getFormatBCH()) ^
+            ((((this.info.ecLevel << 3) | mask) << 10) | this.getFormatBCH(mask)) ^
             0b101010000010010;
         const versionData =
             this.info.version >= 7
@@ -187,8 +263,8 @@ export class Qr {
             .toString(2)
             .padStart(15, '0')
             .split('');
-        console.log('format data:', formatData.toString(2).padStart(15, '0'));
-        this.bits = mat(this.info.size, 1);
+
+        let bits = mat(this.info.size, 1);
         const marker = mat([
             [1, 1, 1, 1, 1, 1, 1, 0],
             [1, 0, 0, 0, 0, 0, 1, 0],
@@ -208,18 +284,21 @@ export class Qr {
         ]);
         const markerSize = marker.size();
         const stripLen = this.info.size.x - 2 * markerSize.x;
-        let strip: number[] = [];
+        const strip: number[] = [];
         for (let i = 0; i < stripLen; i++) {
             strip.push(i % 2 ? 0 : 1);
         }
+
         for (let i = 0; i < this.info.aMarkers.length; i++) {
             const pos = this.info.aMarkers[i];
-            this.bits = this.bits.setElOffs(aMarker, pos);
+            bits = bits.setElOffs(aMarker, pos);
         }
+
         const errorFormatParts = formatDataStr
             .slice(5)
             .map((e) => (e === '1' ? 1 : 0));
-        this.bits = this.bits
+
+        bits = bits
             .setElOffs(marker, vec2(0, 0))
             .setElOffs(marker.rot(90), vec2(this.info.size.x - markerSize.x, 0))
             .setElOffs(
@@ -265,9 +344,10 @@ export class Qr {
                 ),
                 vec2(markerSize.x, this.info.size.y - 5),
             );
-        this.bits.data[markerSize.y][markerSize.x - 3] = errorFormatParts[0];
-        this.bits.data[markerSize.y][markerSize.x - 1] = errorFormatParts[1];
-        this.bits = this.bits.mulElOffs(
+
+        bits.data[markerSize.y][markerSize.x - 3] = errorFormatParts[0];
+        bits.data[markerSize.y][markerSize.x - 1] = errorFormatParts[1];
+        bits = bits.mulElOffs(
             mat([
                 ...errorFormatParts
                     .slice(4, 10)
@@ -281,29 +361,48 @@ export class Qr {
             ]),
             vec2(markerSize.x, 0),
         );
-        this.bits.data[this.info.size.y - markerSize.y + 2][markerSize.x] =
+        bits.data[this.info.size.y - markerSize.y + 2][markerSize.x] =
             errorFormatParts[0];
-        this.bits.data[this.info.size.y - markerSize.y + 1][markerSize.x] =
+        bits.data[this.info.size.y - markerSize.y + 1][markerSize.x] =
             errorFormatParts[1];
-        this.bits = this.bits.mulElOffs(
+        bits = bits.mulElOffs(
             mat([errorFormatParts.slice(2, 10).map((e) => e)]),
             vec2(this.info.size.x - markerSize.x, markerSize.y),
         );
+
         if (this.info.version >= 7) {
             for (let i = 0; i < 18; i++) {
                 const bit = (versionData >>> i) & 1;
-                this.bits.data[Math.floor(i / 3)][this.info.size.x - 11 + (i % 3)] =
-                    bit;
-                this.bits.data[this.info.size.y - 11 + (i % 3)][Math.floor(i / 3)] =
-                    bit;
+                bits.data[Math.floor(i / 3)][this.info.size.x - 11 + (i % 3)] = bit;
+                bits.data[this.info.size.y - 11 + (i % 3)][Math.floor(i / 3)] = bit;
             }
         }
 
+        this.fillData(bits, dataBytes, dataMask);
+        this.applyMask(bits, dataMask, mask);
+        return bits;
+    }
+
+    private generate(): void {
         const dataMask = this.getDataMask();
         const dataBytes = getQrCodewords(this.dataBytes, this.info);
-        this.fillData(dataBytes, dataMask);
-        this.applyMask(dataMask);
+
+        let bestMask = 0;
+        let bestBits = this.buildBits(0, dataBytes, dataMask);
+        let bestScore = this.getPenaltyScore(bestBits);
+
+        for (let mask = 1; mask < 8; mask++) {
+            const bits = this.buildBits(mask, dataBytes, dataMask);
+            const score = this.getPenaltyScore(bits);
+            if (score < bestScore) {
+                bestMask = mask;
+                bestBits = bits;
+                bestScore = score;
+            }
+        }
+
+        this.mask = bestMask;
+        this.bits = bestBits;
         this.maskData = dataMask;
-        // this.bits = dataMask;
     }
 }

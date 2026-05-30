@@ -101,7 +101,7 @@ async function main(): Promise<void> {
     });
     const infoEl = document.getElementById('info') as HTMLDivElement;
 
-    const code = new Qr('M', 0b100, input.value);
+    const code = new Qr('M', input.value);
     drawQrCode(code, canvas, container);
     infoEl.innerHTML = `Version: ${code.info.version}<br/> EC Level: ${code.info.ecLevel}<br/> Mode: ${code.info.mode}<br/> Data codewords: ${code.info.dataCodewords}`;
 
