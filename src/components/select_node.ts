@@ -13,7 +13,6 @@ export async function buildSelect(vars: SelectVars): Promise<string> {
         const optionsVars = vars.options[i];
         options.push(await buildSelectOption(optionsVars));
     }
-    console.log(options);
     const html = defaultComponentBuild('select.html', {
         ...vars,
         options: options.join('\n'),
