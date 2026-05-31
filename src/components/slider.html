@@ -1,0 +1,44 @@
+<div
+    id="{{id}}"
+    style="
+        position: relative;
+        width: 100%;
+        height: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    "
+    onmouseenter="{{id}}_onMouseEnter(event, this)"
+    onmouseleave="{{id}}_onMouseLeave(event, this)"
+    onmousemove="{{id}}_onMouseMove(event, this)"
+    onmousedown="{{id}}_onMouseDown(event, this)"
+    onmouseup="{{id}}_onMouseUp(event, this)"
+>
+    <div style="width: 95%; height: 4px; background-color: white"></div>
+    <div
+        id="{{id}}_knob"
+        style="
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 8px;
+            height: 8px;
+            background-color: blue;
+        "
+    ></div>
+</div>
+<script>
+    (function () {
+        let value = 0;
+        window['{{id}}_value'] = 0;
+        window['{{id}}_knob_el'] = document.getElementById('{{id}}_knob');
+        window['{{id}}_onMouseEnter'] = (event, element) => {};
+        window['{{id}}_onMouseLeave'] = (event, element) => {};
+        window['{{id}}_onMouseMove'] = (event, element) => {
+            console.log(window['{{id}}_knob_el']);
+        };
+        window['{{id}}_onMouseDown'] = (event, element) => {};
+        window['{{id}}_onMouseUp'] = (event, element) => {};
+        window['{{id}}_setValue'] = (value) => {};
+    })();
+</script>

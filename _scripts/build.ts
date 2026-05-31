@@ -1,6 +1,6 @@
-import { FS } from './utils/fs';
+import { FS } from '../src/utils/fs';
 import path from 'path';
-import { StringUtility } from './utils/string';
+import { StringUtility } from '../src/utils/string';
 
 export async function build() {
     const fs = new FS(path.join(process.cwd(), 'dist'));

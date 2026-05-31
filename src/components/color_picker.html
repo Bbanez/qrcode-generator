@@ -1,0 +1,79 @@
+<div style="position: relative; display: block; width: 100%">
+    <label for="{{inputId}}" style="text-transform: uppercase; font-size: 12px">
+        {{title}}
+    </label>
+    <div
+        style="
+            display: grid;
+            position: relative;
+            grid-template-columns: 32px 1fr;
+            gap: 10px;
+        "
+    >
+        <div
+            style="
+                position: relative;
+                width: 100%;
+                height: 32px;
+                padding: 1px;
+                background-color: #ccc;
+                cursor: pointer;
+            "
+        >
+            <div
+                style="width: 100%; height: 100%; background-color: var({{colorVar}})"
+            ></div>
+            <div
+                style="
+                    position: absolute;
+                    top: 38px;
+                    left: 0;
+                    border: 1px solid #ccc;
+                    background-color: black;
+                    color: white;
+                    box-shadow: 0px 4px 15px 0px rgba(0, 0, 0, 0.1);
+                    display: flex;
+                    flex-direction: column;
+                    width: 200px;
+                    padding: 10px;
+                "
+            >
+                {{slider_r}} {{slider_g}} {{slider_g}}
+            </div>
+        </div>
+        <div style="position: relative">
+            <input
+                id="{{inputId}}"
+                style="
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    height: 32px;
+                    padding: 0 10px 0 24px;
+                    font-size: 16px;
+                    border: 1px solid #ccc;
+                    background-color: var(--c-bg);
+                    color: var(--c-fg);
+                    outline: none;
+                "
+                value="FFFFFF"
+                placeholder="Hex color"
+            />
+            <div
+                style="
+                    position: absolute;
+                    top: 1px;
+                    left: 12px;
+                    height: 32px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    opacity: 0.5;
+                "
+            >
+                #
+            </div>
+        </div>
+    </div>
+</div>
