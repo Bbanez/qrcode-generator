@@ -11,19 +11,15 @@
             type="font/woff2"
             crossorigin
         />
-        <link
-            rel="preload"
-            href="/webfonts/JetBrainsMono-Bold.woff2"
-            as="font"
-            type="font/woff2"
-            crossorigin
-        />
         <link rel="stylesheet" href="/src/styles/reset.css" type="text/css" />
         <link rel="stylesheet" href="/src/styles/fonts.css" type="text/css" />
         <style>
             :root {
                 --c-fg: #fff;
                 --c-bg: #000;
+            }
+            * {
+                user-select: none;
             }
         </style>
 
@@ -41,7 +37,6 @@
     >
         <h1
             style="
-                font-weight: bold;
                 font-size: 32px;
                 margin: 20px auto 60px auto;
             "
@@ -81,7 +76,7 @@
                 style="
                     text-transform: uppercase;
                     font-size: 12px;
-                    color: #888;
+                    color: var(--c-fg);
                     margin-top: 20px;
                 "
             >
@@ -106,7 +101,7 @@
                 style="
                     text-transform: uppercase;
                     font-size: 12px;
-                    color: #888;
+                    color: var(--c-fg);
                     margin-top: 20px;
                 "
             >

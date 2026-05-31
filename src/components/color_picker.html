@@ -1,5 +1,5 @@
 <div style="position: relative; display: block; width: 100%">
-    <label for="{{inputId}}" style="text-transform: uppercase; font-size: 12px">
+    <label for="{{id}}" style="text-transform: uppercase; font-size: 12px">
         {{title}}
     </label>
     <div
@@ -21,9 +21,12 @@
             "
         >
             <div
-                style="width: 100%; height: 100%; background-color: var({{colorVar}})"
+                id="{{id}}_picker_open_btn"
+                style="width: 100%; height: 100%; background-color: {{colorClass}}"
+                onclick="{{id}}_picker_onClick(event)"
             ></div>
             <div
+                id="{{id}}_picker"
                 style="
                     position: absolute;
                     top: 38px;
@@ -33,17 +36,20 @@
                     color: white;
                     box-shadow: 0px 4px 15px 0px rgba(0, 0, 0, 0.1);
                     display: flex;
+                    gap: 10px;
                     flex-direction: column;
                     width: 200px;
                     padding: 10px;
+                    pointer-events: none;
+                    opacity: 0;
                 "
             >
-                {{slider_r}} {{slider_g}} {{slider_g}}
+                {{slider_r}} {{slider_g}} {{slider_b}}
             </div>
         </div>
         <div style="position: relative">
             <input
-                id="{{inputId}}"
+                id="{{id}}"
                 style="
                     position: absolute;
                     top: 0;
@@ -57,7 +63,7 @@
                     color: var(--c-fg);
                     outline: none;
                 "
-                value="FFFFFF"
+                value="{{colorValue}}"
                 placeholder="Hex color"
             />
             <div
@@ -77,3 +83,79 @@
         </div>
     </div>
 </div>
+
+<script>
+    window.addEventListener('load', () => {
+        let pickerVisible = false;
+        const pickerId = '{{id}}_picker';
+        const pickerEl = document.getElementById(pickerId);
+        const pickerOpenBtnEl = document.getElementById(
+            '{{id}}_picker_open_btn',
+        );
+        const inputEl = document.getElementById('{{id}}');
+        {
+            const color = Color.fromHex(inputEl.value);
+            window['{{id}}_slider_r_onSetValue'](color ? color.r : 0);
+            window['{{id}}_slider_g_onSetValue'](color ? color.g : 0);
+            window['{{id}}_slider_b_onSetValue'](color ? color.b : 0);
+        }
+        let lock = false;
+
+        window['{{id}}_picker_onClick'] = (event) => {
+            lock = true;
+            setTimeout(() => {
+                if (pickerVisible) {
+                    pickerVisible = false;
+                    pickerEl.style.opacity = '0';
+                    pickerEl.style['pointer-events'] = 'none';
+                } else {
+                    pickerVisible = true;
+                    pickerEl.style.opacity = '1';
+                    pickerEl.style['pointer-events'] = 'auto';
+                }
+                lock = false;
+            }, 20);
+        };
+
+        window.addEventListener('click', (event) => {
+            if (!pickerVisible || lock) {
+                return;
+            }
+            const el = findParentElById(event.target, pickerId);
+            if (el) {
+                return;
+            }
+            pickerVisible = false;
+            pickerEl.style.opacity = '0';
+            pickerEl.style['pointer-events'] = 'none';
+        });
+
+        window['{{id}}_slider_r_setValue'] = (value) => {
+            let color = window.Color.fromHex(inputEl.value);
+            if (!color) {
+                color = new window.Color(0, 0, 0, 255);
+            }
+            color.r = value;
+            inputEl.value = color.toHex().toUpperCase();
+            inputEl.dispatchEvent(new Event('input'));
+        };
+        window['{{id}}_slider_g_setValue'] = (value) => {
+            let color = window.Color.fromHex(inputEl.value);
+            if (!color) {
+                color = new window.Color(0, 0, 0, 255);
+            }
+            color.g = value;
+            inputEl.value = color.toHex().toUpperCase();
+            inputEl.dispatchEvent(new Event('input'));
+        };
+        window['{{id}}_slider_b_setValue'] = (value) => {
+            let color = window.Color.fromHex(inputEl.value);
+            if (!color) {
+                color = new window.Color(0, 0, 0, 255);
+            }
+            color.b = value;
+            inputEl.value = color.toHex().toUpperCase();
+            inputEl.dispatchEvent(new Event('input'));
+        };
+    });
+</script>

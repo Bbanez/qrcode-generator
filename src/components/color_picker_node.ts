@@ -2,21 +2,28 @@ import { defaultComponentBuild } from './_default_node';
 import { sliderBuild } from './slider_node';
 
 interface Vars {
-    inputId: string;
+    id: string;
     title: string;
-    colorVar: string;
+    colorClass: string;
+    colorValue: string;
 }
 
 export async function colorPickerBuild(vars: Vars): Promise<string> {
     let html = await defaultComponentBuild('color_picker.html', vars);
     const rSlider = await sliderBuild({
-        id: `${vars.inputId}_slider_r`,
+        id: `${vars.id}_slider_r`,
+        parentId: vars.id,
+        lineColor: 'linear-gradient(to right, #000, red)',
     });
     const gSlider = await sliderBuild({
-        id: `${vars.inputId}_slider_g`,
+        id: `${vars.id}_slider_g`,
+        parentId: vars.id,
+        lineColor: 'linear-gradient(to right, #000, green)',
     });
     const bSlider = await sliderBuild({
-        id: `${vars.inputId}_slider_b`,
+        id: `${vars.id}_slider_b`,
+        parentId: vars.id,
+        lineColor: 'linear-gradient(to right, #000, blue)',
     });
     html = html.replaceAll('{{slider_r}}', rSlider);
     html = html.replaceAll('{{slider_g}}', gSlider);

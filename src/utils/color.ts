@@ -41,7 +41,7 @@ export class Color {
         const g = this.g.toString(16).padStart(2, '0');
         const b = this.b.toString(16).padStart(2, '0');
         const a = this.a.toString(16).padStart(2, '0');
-        return `#${r}${g}${b}${a}`;
+        return `${r}${g}${b}${a}`;
     }
 
     static fromHex(hex: string): Color | null {

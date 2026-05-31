@@ -13,17 +13,19 @@ export default defineConfig({
                 html = html.replace(
                     '<!-- {{fgcPicker}} -->',
                     await colorPickerBuild({
-                        inputId: 'fgc_input',
+                        id: 'fgc_input',
                         title: 'Foreground Color',
-                        colorVar: '--c-fg',
+                        colorClass: 'var(--c-fg)',
+                        colorValue: 'FFFFFF',
                     }),
                 );
                 html = html.replace(
                     '<!-- {{bgcPicker}} -->',
                     await colorPickerBuild({
-                        inputId: 'bgc_input',
+                        id: 'bgc_input',
                         title: 'Background Color',
-                        colorVar: '--c-bg',
+                        colorClass: 'var(--c-bg)',
+                        colorValue: '000000',
                     }),
                 );
                 return html;
