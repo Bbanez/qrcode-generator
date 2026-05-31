@@ -106,7 +106,6 @@
         const inputEl = document.getElementById('{{id}}');
         {
             const color = Color.fromHex(inputEl.value);
-            console.log(color);
             window['{{id}}_slider_r_onSetValue'](color ? color.r : 0);
             window['{{id}}_slider_g_onSetValue'](color ? color.g : 0);
             window['{{id}}_slider_b_onSetValue'](color ? color.b : 0);
