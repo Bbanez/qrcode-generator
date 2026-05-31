@@ -25,8 +25,14 @@ export async function colorPickerBuild(vars: Vars): Promise<string> {
         parentId: vars.id,
         lineColor: 'linear-gradient(to right, #000, blue)',
     });
+    const aSlider = await sliderBuild({
+        id: `${vars.id}_slider_a`,
+        parentId: vars.id,
+        lineColor: 'linear-gradient(to right, #000, white)',
+    });
     html = html.replaceAll('{{slider_r}}', rSlider);
     html = html.replaceAll('{{slider_g}}', gSlider);
     html = html.replaceAll('{{slider_b}}', bSlider);
+    html = html.replaceAll('{{slider_a}}', aSlider);
     return html;
 }

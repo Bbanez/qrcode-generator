@@ -44,7 +44,18 @@
                     opacity: 0;
                 "
             >
-                {{slider_r}} {{slider_g}} {{slider_b}}
+                <div
+                    style="
+                        display: flex;
+                        position: relative;
+                        flex-direction: column;
+                        gap: 10px;
+                        width: 50%;
+                        margin: 0 auto;
+                    "
+                >
+                    {{slider_r}} {{slider_g}} {{slider_b}} {{slider_a}}
+                </div>
             </div>
         </div>
         <div style="position: relative">
@@ -99,6 +110,7 @@
             window['{{id}}_slider_r_onSetValue'](color ? color.r : 0);
             window['{{id}}_slider_g_onSetValue'](color ? color.g : 0);
             window['{{id}}_slider_b_onSetValue'](color ? color.b : 0);
+            window['{{id}}_slider_a_onSetValue'](color ? color.a : 0);
         }
         let lock = false;
 
@@ -155,6 +167,15 @@
                 color = new window.Color(0, 0, 0, 255);
             }
             color.b = value;
+            inputEl.value = color.toHex().toUpperCase();
+            inputEl.dispatchEvent(new Event('input'));
+        };
+        window['{{id}}_slider_a_setValue'] = (value) => {
+            let color = window.Color.fromHex(inputEl.value);
+            if (!color) {
+                color = new window.Color(0, 0, 0, 255);
+            }
+            color.a = value;
             inputEl.value = color.toHex().toUpperCase();
             inputEl.dispatchEvent(new Event('input'));
         };
