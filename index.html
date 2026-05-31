@@ -4,13 +4,6 @@
         <meta charset="UTF-8" />
         <link rel="icon" type="image/svg+xml" href="/favicon.png" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link
-            rel="preload"
-            href="/webfonts/JetBrainsMono-Regular.woff2"
-            as="font"
-            type="font/woff2"
-            crossorigin
-        />
         <link rel="stylesheet" href="/src/styles/reset.css" type="text/css" />
         <link rel="stylesheet" href="/src/styles/fonts.css" type="text/css" />
         <style>
@@ -57,10 +50,16 @@
             color: var(--c-fg);
             display: flex;
             flex-direction: column;
-            font-family: 'JetBrains Mono';
+            font-family: monospace;
         "
     >
-        <h1 style="font-size: 32px; margin: 20px auto 60px auto">
+        <h1
+            style="
+                font-size: 32px;
+                margin: 20px auto 60px auto;
+                font-weight: bold;
+            "
+        >
             QRCode Generator
         </h1>
         <canvas
@@ -80,6 +79,7 @@
                 background-color: var(--c-bg);
                 color: var(--c-fg);
                 border: 1px solid #ccc;
+                cursor: pointer;
             "
         >
             Download
