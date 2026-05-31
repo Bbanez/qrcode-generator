@@ -6,6 +6,7 @@ interface Vars {
     title: string;
     colorClass: string;
     colorValue: string;
+    leftOffset: string;
 }
 
 export async function colorPickerBuild(vars: Vars): Promise<string> {

@@ -60,23 +60,49 @@
             window['{{id}}_setValue'](value);
         }
 
-        window.addEventListener('mousemove', (event) => {
+        function onMove(x) {
             if (!down) {
                 return;
             }
-            calcPos(event.clientX);
-        });
-        window.addEventListener('mousedown', (event) => {
+            calcPos(x);
+        }
+
+        function onDown(event, x) {
             const parent = window.findParentElById(event.target, id);
             if (!parent) {
                 return;
             }
             down = true;
-            calcPos(event.clientX);
-        });
-        window.addEventListener('mouseup', (event) => {
+            calcPos(x);
+        }
+
+        function onUp() {
             down = false;
+        }
+
+        window.addEventListener('mousemove', (event) => {
+            onMove(event.clientX);
         });
+        window.addEventListener('touchmove', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            onMove(event.touches[0].clientX);
+        });
+
+        window.addEventListener('mousedown', (event) => {
+            onDown(event, event.clientX);
+        });
+        window.addEventListener('touchstart', (event) => {
+            onDown(event, event.touches[0].clientX);
+        });
+
+        window.addEventListener('mouseup', (event) => {
+            onUp();
+        });
+        window.addEventListener('touchend', (event) => {
+            onUp();
+        });
+
         window['{{id}}_setValue'] = (val) => {};
         window['{{id}}_onSetValue'] = (val) => {
             value = val;

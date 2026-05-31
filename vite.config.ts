@@ -19,6 +19,7 @@ export default defineConfig({
                             title: 'Foreground Color',
                             colorClass: 'var(--c-fg)',
                             colorValue: 'FFFFFFFF',
+                            leftOffset: '0px',
                         }),
                     )
                     .replace(
@@ -28,6 +29,7 @@ export default defineConfig({
                             title: 'Background Color',
                             colorClass: 'var(--c-bg)',
                             colorValue: '000000FF',
+                            leftOffset: '-100px',
                         }),
                     )
                     .replace(
