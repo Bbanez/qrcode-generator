@@ -72,7 +72,7 @@ window.qrInit = function (): void {
     if (!textEl) {
         throw new Error('Input element not found');
     }
-    const ecLevelEl = document.getElementById('ec-level') as HTMLSelectElement;
+    const ecLevelEl = document.getElementById('ec_level') as HTMLSelectElement;
     if (!ecLevelEl) {
         throw new Error('EC level select element not found');
     }
