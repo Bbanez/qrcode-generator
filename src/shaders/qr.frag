@@ -10,6 +10,7 @@ uniform vec2 u_textureSize;
 uniform float u_quietZone;
 uniform vec4 u_bgColor;
 uniform vec4 u_fgColor;
+uniform bool u_dots;
 
 out vec4 outColor;
 
@@ -73,10 +74,17 @@ void main() {
     float mask_value = texture(u_mask_tx, sampleUv).r;
     vec3 color = vec3(qr_value);
     if (qr_value < 0.5) {
-        float d = sdfCircleAbs(vec3(moduleSize * 0.5, moduleSize * 0.5, moduleSize * 0.5), mod(local, moduleSize));
-        color = mix(u_bgColor.rgb, u_fgColor.rgb, d);
+        if (u_dots) {
+            float d = sdfCircleAbs(vec3(moduleSize * 0.5, moduleSize * 0.5, moduleSize * 0.45), mod(local, moduleSize));
+            color = mix(u_bgColor.rgb, u_fgColor.rgb, d);
+        } else {
+            color = u_fgColor.rgb;
+        }
     } else {
         color = u_bgColor.rgb;
     }
+    // if (mask_value > 0.5) {
+    //     color.r = mask_value;
+    // }
     outColor = vec4(color, 1.0);
 }

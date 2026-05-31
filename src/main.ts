@@ -88,6 +88,20 @@ window.qrInit = function (): void {
     if (!bgColorInputEl) {
         throw new Error('Background color input element not found');
     }
+    const styleSelectEl = document.getElementById(
+        'style_select',
+    ) as HTMLSelectElement;
+    if (!styleSelectEl) {
+        throw new Error('Style select element not found');
+    }
+
+    {
+        const style = storage.get('style');
+        if (style) {
+            styleSelectEl.value = style;
+            renderer.style = style;
+        }
+    }
 
     {
         const fgColor = storage.get('fg_color');
@@ -169,6 +183,14 @@ window.qrInit = function (): void {
             render();
         });
     }
+
+    styleSelectEl.addEventListener('change', () => {
+        const style = styleSelectEl.value;
+        renderer.style = style;
+        storage.set('style', style);
+        render();
+    });
+
     window.addEventListener('resize', render);
     render();
     window.qrReady.trigger();

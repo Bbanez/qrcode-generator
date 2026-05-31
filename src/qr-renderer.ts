@@ -18,9 +18,11 @@ export class QrRenderer {
     private uQuietZone: WebGLUniformLocation;
     private bgColorLoc: WebGLUniformLocation;
     private fgColorLoc: WebGLUniformLocation;
+    private dotsLoc: WebGLUniformLocation;
 
     bgColor = new Color(0, 0, 0, 255);
     fgColor = new Color(255, 255, 255, 255);
+    style = 'square';
 
     constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas;
@@ -62,6 +64,7 @@ export class QrRenderer {
             bgColorLoc: gl.getUniformLocation(this.program, 'u_bgColor'),
             fgColorLoc: gl.getUniformLocation(this.program, 'u_fgColor'),
             uQuietZone: gl.getUniformLocation(this.program, 'u_quietZone'),
+            dotsLoc: gl.getUniformLocation(this.program, 'u_dots'),
         };
         for (const [key, loc] of Object.entries(locs)) {
             if (!loc) {
@@ -73,6 +76,7 @@ export class QrRenderer {
         this.uQuietZone = locs.uQuietZone as WebGLUniformLocation;
         this.bgColorLoc = locs.bgColorLoc as WebGLUniformLocation;
         this.fgColorLoc = locs.fgColorLoc as WebGLUniformLocation;
+        this.dotsLoc = locs.dotsLoc as WebGLUniformLocation;
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, this.texture);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -154,6 +158,7 @@ export class QrRenderer {
             this.bgColor.an,
         );
         gl.uniform1f(this.uQuietZone, QUIET_ZONE_MODULES);
+        gl.uniform1i(this.dotsLoc, this.style === 'dots' ? 1 : 0);
         gl.drawArrays(gl.TRIANGLES, 0, 6);
     }
 }
