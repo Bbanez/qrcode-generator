@@ -68,6 +68,10 @@ window.qrInit = function (): void {
     const canvas = document.getElementById('canvas') as HTMLCanvasElement;
     const renderer = new QrRenderer(canvas);
 
+    const saveEl = document.getElementById('save') as HTMLButtonElement;
+    if (!saveEl) {
+        throw new Error('Save button element not found');
+    }
     const textEl = document.getElementById('input') as HTMLInputElement;
     if (!textEl) {
         throw new Error('Input element not found');
@@ -189,6 +193,11 @@ window.qrInit = function (): void {
         renderer.style = style;
         storage.set('style', style);
         render();
+    });
+
+    saveEl.addEventListener('click', () => {
+        const imageUrl = canvas.toDataURL('image/png');
+        window.open(imageUrl, '_blank');
     });
 
     window.addEventListener('resize', render);

@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.png" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link
             rel="preload"
@@ -24,6 +24,10 @@
         </style>
 
         <title>QRCode Generator</title>
+        <meta
+            name="description"
+            content="Truly free simple QR code generator.Completely client-side, what you input is what you get in the QR code!"
+        />
     </head>
 
     <body
@@ -44,6 +48,21 @@
             width="400"
             height="400"
         ></canvas>
+        <button
+            id="save"
+            style="
+                width: 100%;
+                max-width: 400px;
+                margin: 20px auto 0 auto;
+                padding: 10px;
+                font-size: 16px;
+                background-color: var(--c-bg);
+                color: var(--c-fg);
+                border: 1px solid #ccc;
+            "
+        >
+            Download
+        </button>
         <div
             style="
                 position: relative;
@@ -52,7 +71,7 @@
                 width: 100%;
                 max-width: 400px;
                 margin: 0 auto;
-                margin-top: 40px;
+                margin-top: 20px;
             "
         >
             <div

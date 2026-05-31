@@ -7,8 +7,8 @@ import type { Mat } from './math/mat';
 const QUIET_ZONE_MODULES = 4;
 
 export class QrRenderer {
-    private canvas: HTMLCanvasElement;
-    private gl: WebGL2RenderingContext;
+    canvas: HTMLCanvasElement;
+    gl: WebGL2RenderingContext;
     private program: WebGLProgram;
     private texture: WebGLTexture;
     private maskTexture: WebGLTexture;
@@ -29,6 +29,7 @@ export class QrRenderer {
         const gl = canvas.getContext('webgl2', {
             antialias: false,
             alpha: false,
+            preserveDrawingBuffer: true,
         });
         if (!gl) {
             throw new Error('WebGL2 is not supported in this browser');
