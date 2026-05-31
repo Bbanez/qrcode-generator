@@ -51,7 +51,7 @@ export function findChildByTag<El = HTMLElement>(
     return null;
 }
 
-export function findParentElById(el: HTMLElement, id: string) {
+export function findParentElById(el: HTMLElement, id: string): HTMLElement | null {
     if (!el) {
         return null;
     }
