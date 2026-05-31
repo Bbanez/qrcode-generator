@@ -100,7 +100,7 @@ window.qrInit = function (): void {
     }
 
     {
-        const style = storage.get('style');
+        const style = storage.get<any>('style');
         if (style && ['square', 'dots'].includes(style)) {
             styleSelectEl.value = style;
             renderer.style = style;
@@ -210,4 +210,14 @@ window.qrInit = function (): void {
     render();
     window.qrReady.trigger();
 };
+
+window.addEventListener('error', (event) => {
+    const el = document.getElementById('err_toast');
+    if (!el) {
+        return;
+    }
+    el.textContent = event.message + '\n\n' + event.error?.stack;
+    el.style.display = 'block';
+});
+
 window.qrInit();
