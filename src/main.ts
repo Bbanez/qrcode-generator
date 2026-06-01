@@ -101,8 +101,8 @@ window.qrInit = function (): void {
     }
 
     {
-        const style = storage.get('style');
-        if (style) {
+        const style = storage.get<any>('style');
+        if (style && ['square', 'dots'].includes(style)) {
             styleSelectEl.value = style;
             renderer.style = style;
         }
@@ -134,12 +134,19 @@ window.qrInit = function (): void {
             }
         }
     }
+    {
+        const text = storage.get('text');
+        if (text) {
+            textEl.value = text;
+        }
+    }
 
     const code = new Qr('H', textEl.value);
     const render = (): void => {
         renderer.draw(code);
     };
     textEl.addEventListener('input', () => {
+        storage.set('text', textEl.value);
         code.setData(textEl.value);
         render();
     });
@@ -153,7 +160,6 @@ window.qrInit = function (): void {
             renderer.fgColor = fgColor;
         }
         fgColorInputEl.addEventListener('input', (event) => {
-            console.log('fg color input');
             const el = event.target as HTMLInputElement;
             el.value = el.value.toUpperCase().slice(0, 8);
             const c = Color.fromHex(el.value);
@@ -205,4 +211,14 @@ window.qrInit = function (): void {
     render();
     window.qrReady.trigger();
 };
+
+window.addEventListener('error', (event) => {
+    const el = document.getElementById('err_toast');
+    if (!el) {
+        return;
+    }
+    el.textContent = event.message + '\n\n' + event.error?.stack;
+    el.style.display = 'block';
+});
+
 window.qrInit();
