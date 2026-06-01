@@ -12,6 +12,7 @@ import {
 } from './utils/dom';
 import { QrRenderer } from './qr-renderer';
 import { Sub } from './utils/sub';
+import { downloadDataUrl } from './utils/download';
 
 declare global {
     interface Window {
@@ -197,7 +198,7 @@ window.qrInit = function (): void {
 
     saveEl.addEventListener('click', () => {
         const imageUrl = canvas.toDataURL('image/png');
-        window.open(imageUrl, '_blank');
+        downloadDataUrl(imageUrl, 'qr-code.png');
     });
 
     window.addEventListener('resize', render);
