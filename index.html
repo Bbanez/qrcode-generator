@@ -68,12 +68,27 @@
         >
             QRCode Generator
         </h1>
-        <canvas
-            id="canvas"
-            style="width: 100%; margin: 0 auto; aspect-ratio: 1"
-            width="400"
-            height="400"
-        ></canvas>
+        <div
+            style="
+                position: relative;
+                width: 100%;
+                aspect-ratio: 1;
+                background-color: white;
+            "
+        >
+            <canvas
+                id="canvas"
+                style="
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                "
+                width="400"
+                height="400"
+            ></canvas>
+        </div>
         <button
             id="save"
             style="
