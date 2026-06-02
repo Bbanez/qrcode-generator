@@ -116,7 +116,7 @@ window.qrInit = function (): void {
                 renderer.fgColor = c;
                 document.documentElement.style.setProperty(
                     '--c-fg',
-                    '#' + c.toHex(),
+                    '#' + c.toHex().slice(0, 6),
                 );
                 fgColorInputEl.value = c.toHex().toUpperCase();
             }
@@ -128,7 +128,7 @@ window.qrInit = function (): void {
                 renderer.bgColor = c;
                 document.documentElement.style.setProperty(
                     '--c-bg',
-                    '#' + c.toHex(),
+                    '#' + c.toHex().slice(0, 6),
                 );
                 bgColorInputEl.value = c.toHex().toUpperCase();
             }
@@ -168,7 +168,7 @@ window.qrInit = function (): void {
             }
             document.documentElement.style.setProperty(
                 '--c-fg',
-                '#' + c.toHex(),
+                '#' + c.toHex().slice(0, 6),
             );
             renderer.fgColor = c;
             storage.set('fg_color', c.toHex());
@@ -187,7 +187,7 @@ window.qrInit = function (): void {
             }
             document.documentElement.style.setProperty(
                 '--c-bg',
-                '#' + c.toHex(),
+                '#' + c.toHex().slice(0, 6),
             );
             renderer.bgColor = c;
             storage.set('bg_color', c.toHex());
