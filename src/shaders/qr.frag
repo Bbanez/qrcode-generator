@@ -73,18 +73,21 @@ void main() {
     float qr_value = texture(u_qr, sampleUv).r;
     float mask_value = texture(u_mask_tx, sampleUv).r;
     vec3 color = vec3(qr_value);
+    float alpha = 1.0;
     if (qr_value < 0.5) {
         if (u_dots) {
             float d = sdfCircleAbs(vec3(moduleSize * 0.5, moduleSize * 0.5, moduleSize * 0.45), mod(local, moduleSize));
             color = mix(u_bgColor.rgb, u_fgColor.rgb, d);
+            alpha = mix(u_bgColor.a, u_fgColor.a, d);
         } else {
             color = u_fgColor.rgb;
         }
     } else {
         color = u_bgColor.rgb;
+        alpha = u_bgColor.a;
     }
     // if (mask_value > 0.5) {
     //     color.r = mask_value;
     // }
-    outColor = vec4(color, 1.0);
+    outColor = vec4(color, alpha);
 }
